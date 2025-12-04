@@ -48,6 +48,82 @@ import {
   getNodeStats,
   getTopNodes
 } from './lib/context-ledger.js'
+import adminRoutes, { requireAdmin, setDatabase as setAdminDatabase } from './lib/admin-routes.js'
+import { pool } from './db/index.js'
+import fs from 'fs'
+import path from 'path'
+import { fileURLToPath } from 'url'
+
+// Run database migrations on startup
+async function runMigrations() {
+  console.log('[MIGRATE] Starting database migrations...')
+
+  try {
+    // Get migrations directory (handle both src and dist locations)
+    const __dirname = path.dirname(fileURLToPath(import.meta.url))
+    let migrationsDir = path.join(__dirname, 'db/migrations')
+
+    // If not found, try parent directory (for when running from dist/)
+    if (!fs.existsSync(migrationsDir)) {
+      migrationsDir = path.join(__dirname, '../db/migrations')
+    }
+
+    // Also try project root
+    if (!fs.existsSync(migrationsDir)) {
+      migrationsDir = path.join(process.cwd(), 'db/migrations')
+    }
+
+    if (!fs.existsSync(migrationsDir)) {
+      console.log('[MIGRATE] No migrations directory found at:', migrationsDir)
+      return
+    }
+
+    console.log('[MIGRATE] Using migrations directory:', migrationsDir)
+
+    const files = fs.readdirSync(migrationsDir).filter(f => f.endsWith('.sql')).sort()
+    console.log('[MIGRATE] Found migrations:', files)
+
+    for (const file of files) {
+      const sql = fs.readFileSync(path.join(migrationsDir, file), 'utf-8')
+      try {
+        await pool.query(sql)
+        console.log(`[MIGRATE] ✅ ${file}`)
+      } catch (err: any) {
+        if (err.message.includes('already exists') || err.message.includes('duplicate')) {
+          console.log(`[MIGRATE] ⏭️ ${file} (already applied)`)
+        } else {
+          console.error(`[MIGRATE] ❌ ${file}:`, err.message)
+        }
+      }
+    }
+
+    // Create/update admin user
+    console.log('[MIGRATE] Setting up admin user...')
+    const bcrypt = await import('bcryptjs')
+    const hash = await bcrypt.default.hash('SportIntel2024!', 10)
+
+    const existing = await pool.query('SELECT id FROM users WHERE email = $1', ['shawnsonnier04@gmail.com'])
+
+    if (existing.rows.length === 0) {
+      await pool.query(
+        `INSERT INTO users (email, password_hash, username, first_name, is_admin, subscription_tier)
+         VALUES ($1, $2, $3, $4, true, 'enterprise')`,
+        ['shawnsonnier04@gmail.com', hash, 'shawn_admin', 'Shawn']
+      )
+      console.log('[MIGRATE] ✅ Created admin: shawnsonnier04@gmail.com / SportIntel2024!')
+    } else {
+      await pool.query(
+        'UPDATE users SET password_hash = $1, is_admin = true WHERE email = $2',
+        [hash, 'shawnsonnier04@gmail.com']
+      )
+      console.log('[MIGRATE] ✅ Updated admin: shawnsonnier04@gmail.com / SportIntel2024!')
+    }
+
+    console.log('[MIGRATE] Database migrations complete!')
+  } catch (err: any) {
+    console.error('[MIGRATE] Migration error:', err.message)
+  }
+}
 
 const app = express()
 const httpServer = createServer(app)
@@ -548,12 +624,12 @@ app.get('/api/subscription/plans', async (req, res) => {
     const result = await db.query('SELECT * FROM subscription_plans WHERE active = true ORDER BY price_monthly')
     res.json({ plans: result.rows })
   } catch (err) {
-    // Return default plans if table doesn't exist
+    // Return default plans if table doesn't exist (matches lib/stripe.ts)
     res.json({
       plans: [
-        { name: 'Free', tier: 'free', price_monthly: 0, features: { arb_delay_seconds: 5, max_sports: 2 } },
-        { name: 'Pro', tier: 'pro', price_monthly: 29.99, features: { arb_delay_seconds: 0, max_sports: 4 } },
-        { name: 'Premium', tier: 'premium', price_monthly: 79.99, features: { arb_delay_seconds: 0, max_sports: -1 } }
+        { name: 'Free', tier: 'free', price_monthly: 0, features: { arb_delay_seconds: 5, max_sports: 3, apiCallsPerDay: 100 } },
+        { name: 'Pro', tier: 'pro', price_monthly: 49, features: { arb_delay_seconds: 0, max_sports: 4, apiCallsPerDay: 5000 } },
+        { name: 'Enterprise', tier: 'enterprise', price_monthly: 199, features: { arb_delay_seconds: 0, max_sports: 4, apiCallsPerDay: -1 } }
       ]
     })
   }
@@ -1006,6 +1082,47 @@ app.post('/api/context/game', async (req, res) => {
 })
 
 // ============================================
+// ADMIN ROUTES
+// ============================================
+
+// Initialize admin routes with database pool
+setAdminDatabase(pool)
+
+// Bootstrap endpoint - promote user to admin with secret key (no auth required)
+app.post('/api/bootstrap-admin', async (req, res) => {
+  const { email, secret } = req.body
+  const JWT_SECRET = process.env.JWT_SECRET || 'sportintel-secret-change-in-production'
+
+  if (secret !== JWT_SECRET) {
+    return res.status(403).json({ error: 'Invalid secret' })
+  }
+
+  if (!email) {
+    return res.status(400).json({ error: 'Email required' })
+  }
+
+  try {
+    const result = await pool.query(
+      'UPDATE users SET is_admin = true WHERE email = $1 RETURNING id, email, is_admin',
+      [email]
+    )
+
+    if (result.rows.length === 0) {
+      return res.status(404).json({ error: 'User not found' })
+    }
+
+    console.log('[BOOTSTRAP] Made admin:', email)
+    res.json({ success: true, user: result.rows[0] })
+  } catch (err: any) {
+    console.error('[BOOTSTRAP] Error:', err.message)
+    res.status(500).json({ error: 'Failed to update user' })
+  }
+})
+
+// Mount admin routes (protected by requireAdmin middleware)
+app.use('/api/admin', authenticateToken, requireAdmin, adminRoutes)
+
+// ============================================
 // START SERVER
 // ============================================
 
@@ -1014,6 +1131,9 @@ const discordOk = alertConfig.discord.webhookUrl
 const redisOk = !!process.env.REDIS_URL
 
 httpServer.listen(PORT, async () => {
+  // Run all database migrations on startup
+  await runMigrations()
+
   // Initialize Signal Bus
   try {
     await initSignalBus()
