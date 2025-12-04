@@ -1,5 +1,6 @@
 /**
  * SportIntel Pro - Real-Time API Server
+ * Build: 2025-12-04-v2
  *
  * Features:
  * - WebSocket for instant arbitrage push
@@ -7,6 +8,7 @@
  * - O(n) arbitrage detection
  * - Freemium tier system
  * - Background odds ingestion
+ * - Stripe subscriptions
  */
 
 // Load environment FIRST before any other imports
