@@ -51,7 +51,10 @@ export default function LiveOdds({ sport }: LiveOddsProps) {
       try {
         const response = await axios.get(`/api/odds/${sport}`)
         setOdds(response.data.games || [])
-        setRemaining(response.data.remaining)
+        // Only set remaining if it's a valid number
+        if (typeof response.data.remaining === 'number') {
+          setRemaining(response.data.remaining)
+        }
       } catch (err: any) {
         setError(err.response?.data?.error || 'Failed to fetch odds')
         setOdds([])
