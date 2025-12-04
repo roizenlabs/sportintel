@@ -24,9 +24,10 @@ function getOddsColor(odds: number): string {
 }
 
 function getBestOdds(game: OddsData, side: 'home' | 'away'): { book: string; odds: number } {
-  let best = { book: '', odds: -Infinity }
+  let best = { book: '-', odds: 0 }
+  if (!game.odds) return best
   for (const [book, bookOdds] of Object.entries(game.odds)) {
-    if (bookOdds && bookOdds[side] > best.odds) {
+    if (bookOdds && bookOdds[side] != null && bookOdds[side] > best.odds) {
       best = { book, odds: bookOdds[side] }
     }
   }
@@ -90,18 +91,18 @@ export default function LiveOdds({ sport }: LiveOddsProps) {
 
   return (
     <div className="space-y-4">
-      {remaining !== null && (
+      {typeof remaining === 'number' && remaining >= 0 && (
         <div className="text-sm text-gray-400 text-right">
-          API Requests Remaining: <span className="text-green-400 font-medium">{remaining.toLocaleString()}</span>
+          API Requests Remaining: <span className="text-green-400 font-medium">{(remaining ?? 0).toLocaleString()}</span>
         </div>
       )}
       
-      {odds.map((game) => {
+      {odds.map((game, index) => {
         const bestHome = getBestOdds(game, 'home')
         const bestAway = getBestOdds(game, 'away')
-        
+
         return (
-          <div key={game.id} className="glass-card p-6 hover:border-green-500/30 transition-all">
+          <div key={game.id || `game-${index}`} className="glass-card p-6 hover:border-green-500/30 transition-all">
             <div className="flex justify-between items-start mb-4">
               <div>
                 <h3 className="text-lg font-semibold text-white">{game.game}</h3>
@@ -110,7 +111,7 @@ export default function LiveOdds({ sport }: LiveOddsProps) {
                   <span>{game.startTime}</span>
                 </div>
               </div>
-              {game.odds.draftkings?.spread && (
+              {game.odds?.draftkings?.spread && (
                 <div className="px-3 py-1 rounded-full bg-blue-500/20 text-blue-400 text-sm font-medium">
                   Spread: {game.odds.draftkings.spread > 0 ? '+' : ''}{game.odds.draftkings.spread}
                 </div>
@@ -132,14 +133,14 @@ export default function LiveOdds({ sport }: LiveOddsProps) {
                 <tbody className="text-white">
                   <tr className="border-t border-gray-700/50">
                     <td className="py-3 font-medium">{game.homeTeam}</td>
-                    <td className={`text-center py-3 ${getOddsColor(game.odds.draftkings?.home || 0)}`}>
-                      {game.odds.draftkings ? formatOdds(game.odds.draftkings.home) : '-'}
+                    <td className={`text-center py-3 ${getOddsColor(game.odds?.draftkings?.home || 0)}`}>
+                      {game.odds?.draftkings ? formatOdds(game.odds.draftkings.home) : '-'}
                     </td>
-                    <td className={`text-center py-3 ${getOddsColor(game.odds.fanduel?.home || 0)}`}>
-                      {game.odds.fanduel ? formatOdds(game.odds.fanduel.home) : '-'}
+                    <td className={`text-center py-3 ${getOddsColor(game.odds?.fanduel?.home || 0)}`}>
+                      {game.odds?.fanduel ? formatOdds(game.odds.fanduel.home) : '-'}
                     </td>
-                    <td className={`text-center py-3 ${getOddsColor(game.odds.bovada?.home || 0)}`}>
-                      {game.odds.bovada ? formatOdds(game.odds.bovada.home) : '-'}
+                    <td className={`text-center py-3 ${getOddsColor(game.odds?.bovada?.home || 0)}`}>
+                      {game.odds?.bovada ? formatOdds(game.odds.bovada.home) : '-'}
                     </td>
                     <td className="text-right py-3">
                       <span className="px-2 py-1 rounded bg-green-500/20 text-green-400 text-sm font-medium">
@@ -149,14 +150,14 @@ export default function LiveOdds({ sport }: LiveOddsProps) {
                   </tr>
                   <tr className="border-t border-gray-700/50">
                     <td className="py-3 font-medium">{game.awayTeam}</td>
-                    <td className={`text-center py-3 ${getOddsColor(game.odds.draftkings?.away || 0)}`}>
-                      {game.odds.draftkings ? formatOdds(game.odds.draftkings.away) : '-'}
+                    <td className={`text-center py-3 ${getOddsColor(game.odds?.draftkings?.away || 0)}`}>
+                      {game.odds?.draftkings ? formatOdds(game.odds.draftkings.away) : '-'}
                     </td>
-                    <td className={`text-center py-3 ${getOddsColor(game.odds.fanduel?.away || 0)}`}>
-                      {game.odds.fanduel ? formatOdds(game.odds.fanduel.away) : '-'}
+                    <td className={`text-center py-3 ${getOddsColor(game.odds?.fanduel?.away || 0)}`}>
+                      {game.odds?.fanduel ? formatOdds(game.odds.fanduel.away) : '-'}
                     </td>
-                    <td className={`text-center py-3 ${getOddsColor(game.odds.bovada?.away || 0)}`}>
-                      {game.odds.bovada ? formatOdds(game.odds.bovada.away) : '-'}
+                    <td className={`text-center py-3 ${getOddsColor(game.odds?.bovada?.away || 0)}`}>
+                      {game.odds?.bovada ? formatOdds(game.odds.bovada.away) : '-'}
                     </td>
                     <td className="text-right py-3">
                       <span className="px-2 py-1 rounded bg-green-500/20 text-green-400 text-sm font-medium">
