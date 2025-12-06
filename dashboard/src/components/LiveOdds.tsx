@@ -52,7 +52,7 @@ export default function LiveOdds({ sport }: LiveOddsProps) {
       setError(null)
       try {
         const response = await fetch(`${API_BASE}/api/odds/${sport}`)
-        if (!response.ok) throw new Error('Failed to fetch odds')
+        if (!response.ok) throw new Error(`Failed to fetch odds: ${response.status}`)
         const data = await response.json()
 
         // Transform API format (books array) to component format (odds object)
