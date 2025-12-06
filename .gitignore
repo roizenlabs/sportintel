@@ -31,3 +31,9 @@ coverage/
 
 # Vercel
 .vercel
+
+# Local Netlify folder
+.netlify
+
+.vercel
+.env*.local

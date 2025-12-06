@@ -1,4 +1,5 @@
 import Header from '../components/landing/Header'
+import LiveOddsTicker from '../components/LiveOddsTicker'
 import Hero from '../components/landing/Hero'
 import Features from '../components/landing/Features'
 import Pricing from '../components/landing/Pricing'
@@ -17,6 +18,7 @@ export default function LandingPage() {
   return (
     <div className="min-h-screen bg-[#0a0f1a]">
       <Header />
+      <LiveOddsTicker />
       <Hero />
       <Features />
       <Pricing />

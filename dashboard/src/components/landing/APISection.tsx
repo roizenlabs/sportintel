@@ -43,7 +43,7 @@ export default function APISection() {
             </div>
 
             <h2 className="text-4xl font-bold text-white mb-6">
-              Build with SportIntel API
+              Build with RoizenLabs API
             </h2>
 
             <p className="text-xl text-gray-400 mb-8">

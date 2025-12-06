@@ -1,0 +1,145 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 628">
+  <defs>
+    <linearGradient id="bgGrad3" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#0a0f1a"/>
+      <stop offset="100%" style="stop-color:#1a1f2e"/>
+    </linearGradient>
+    <linearGradient id="greenGrad3" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#22c55e"/>
+      <stop offset="100%" style="stop-color:#10b981"/>
+    </linearGradient>
+  </defs>
+
+  <!-- Background -->
+  <rect width="1200" height="628" fill="url(#bgGrad3)"/>
+
+  <!-- Left side content -->
+  <g transform="translate(80, 100)">
+    <!-- Logo -->
+    <rect width="60" height="60" rx="14" fill="url(#greenGrad3)"/>
+    <path d="M35 8 L18 32 L28 32 L24 52 L42 26 L32 26 Z" fill="white"/>
+
+    <!-- Main headline -->
+    <text x="80" y="45" font-family="Inter, system-ui, sans-serif" font-size="42" font-weight="700" fill="white">
+      Sports Betting API
+    </text>
+    <text x="0" y="120" font-family="Inter, system-ui, sans-serif" font-size="42" font-weight="700" fill="white">
+      For Developers
+    </text>
+
+    <!-- Subheadline -->
+    <text x="0" y="180" font-family="Inter, system-ui, sans-serif" font-size="20" fill="#9ca3af">
+      Real-time odds from 15+ sportsbooks. One simple API.
+    </text>
+
+    <!-- Features list -->
+    <g transform="translate(0, 220)">
+      <circle cx="10" cy="10" r="6" fill="#22c55e"/>
+      <text x="30" y="16" font-family="Inter, system-ui, sans-serif" font-size="16" fill="white">REST & WebSocket</text>
+
+      <circle cx="200" cy="10" r="6" fill="#22c55e"/>
+      <text x="220" y="16" font-family="Inter, system-ui, sans-serif" font-size="16" fill="white">99.9% Uptime</text>
+
+      <circle cx="10" cy="50" r="6" fill="#22c55e"/>
+      <text x="30" y="56" font-family="Inter, system-ui, sans-serif" font-size="16" fill="white">JSON Responses</text>
+
+      <circle cx="200" cy="50" r="6" fill="#22c55e"/>
+      <text x="220" y="56" font-family="Inter, system-ui, sans-serif" font-size="16" fill="white">Free Tier Available</text>
+    </g>
+
+    <!-- CTA Button -->
+    <rect x="0" y="310" width="220" height="56" rx="10" fill="url(#greenGrad3)"/>
+    <text x="110" y="346" font-family="Inter, system-ui, sans-serif" font-size="18" font-weight="600" fill="white" text-anchor="middle">
+      Get API Key
+    </text>
+  </g>
+
+  <!-- Right side - Code block -->
+  <g transform="translate(580, 60)">
+    <rect width="540" height="500" rx="16" fill="#1e1e1e"/>
+
+    <!-- Window controls -->
+    <circle cx="30" cy="25" r="6" fill="#ff5f56"/>
+    <circle cx="50" cy="25" r="6" fill="#ffbd2e"/>
+    <circle cx="70" cy="25" r="6" fill="#27c93f"/>
+
+    <!-- Tab -->
+    <rect x="100" y="10" width="120" height="30" rx="6" fill="#2d2d2d"/>
+    <text x="160" y="30" font-family="monospace" font-size="12" fill="#9ca3af" text-anchor="middle">api.js</text>
+
+    <!-- Code -->
+    <text x="30" y="80" font-family="monospace" font-size="14">
+      <tspan fill="#c586c0">const</tspan>
+      <tspan fill="#9cdcfe"> response</tspan>
+      <tspan fill="#d4d4d4"> = </tspan>
+      <tspan fill="#c586c0">await</tspan>
+      <tspan fill="#dcdcaa"> fetch</tspan>
+      <tspan fill="#d4d4d4">(</tspan>
+    </text>
+    <text x="30" y="105" font-family="monospace" font-size="14">
+      <tspan fill="#ce9178">  'https://api.roizenlabs.com/odds'</tspan>
+    </text>
+    <text x="30" y="130" font-family="monospace" font-size="14" fill="#d4d4d4">);</text>
+
+    <text x="30" y="170" font-family="monospace" font-size="14">
+      <tspan fill="#6a9955">// Response</tspan>
+    </text>
+    <text x="30" y="195" font-family="monospace" font-size="14" fill="#d4d4d4">{</text>
+    <text x="30" y="220" font-family="monospace" font-size="14">
+      <tspan fill="#9cdcfe">  "game"</tspan>
+      <tspan fill="#d4d4d4">: </tspan>
+      <tspan fill="#ce9178">"Lakers vs Celtics"</tspan>
+      <tspan fill="#d4d4d4">,</tspan>
+    </text>
+    <text x="30" y="245" font-family="monospace" font-size="14">
+      <tspan fill="#9cdcfe">  "sport"</tspan>
+      <tspan fill="#d4d4d4">: </tspan>
+      <tspan fill="#ce9178">"NBA"</tspan>
+      <tspan fill="#d4d4d4">,</tspan>
+    </text>
+    <text x="30" y="270" font-family="monospace" font-size="14">
+      <tspan fill="#9cdcfe">  "odds"</tspan>
+      <tspan fill="#d4d4d4">: {</tspan>
+    </text>
+    <text x="30" y="295" font-family="monospace" font-size="14">
+      <tspan fill="#9cdcfe">    "draftkings"</tspan>
+      <tspan fill="#d4d4d4">: { </tspan>
+      <tspan fill="#9cdcfe">"spread"</tspan>
+      <tspan fill="#d4d4d4">: </tspan>
+      <tspan fill="#b5cea8">-3.5</tspan>
+      <tspan fill="#d4d4d4"> },</tspan>
+    </text>
+    <text x="30" y="320" font-family="monospace" font-size="14">
+      <tspan fill="#9cdcfe">    "fanduel"</tspan>
+      <tspan fill="#d4d4d4">: { </tspan>
+      <tspan fill="#9cdcfe">"spread"</tspan>
+      <tspan fill="#d4d4d4">: </tspan>
+      <tspan fill="#b5cea8">-3.0</tspan>
+      <tspan fill="#d4d4d4"> },</tspan>
+    </text>
+    <text x="30" y="345" font-family="monospace" font-size="14">
+      <tspan fill="#9cdcfe">    "betmgm"</tspan>
+      <tspan fill="#d4d4d4">: { </tspan>
+      <tspan fill="#9cdcfe">"spread"</tspan>
+      <tspan fill="#d4d4d4">: </tspan>
+      <tspan fill="#b5cea8">-3.5</tspan>
+      <tspan fill="#d4d4d4"> }</tspan>
+    </text>
+    <text x="30" y="370" font-family="monospace" font-size="14" fill="#d4d4d4">  },</text>
+    <text x="30" y="395" font-family="monospace" font-size="14">
+      <tspan fill="#9cdcfe">  "updated"</tspan>
+      <tspan fill="#d4d4d4">: </tspan>
+      <tspan fill="#ce9178">"2024-01-15T19:30:00Z"</tspan>
+    </text>
+    <text x="30" y="420" font-family="monospace" font-size="14" fill="#d4d4d4">}</text>
+
+    <!-- Latency badge -->
+    <rect x="380" y="450" width="130" height="30" rx="6" fill="#22c55e20" stroke="#22c55e" stroke-width="1"/>
+    <text x="445" y="470" font-family="Inter, system-ui, sans-serif" font-size="12" font-weight="600" fill="#22c55e" text-anchor="middle">~50ms latency</text>
+  </g>
+
+  <!-- Bottom tagline -->
+  <text x="80" y="580" font-family="Inter, system-ui, sans-serif" font-size="14" fill="#6b7280">
+    roizenlabs.com/docs • Developer-ready betting data
+  </text>
+</svg>

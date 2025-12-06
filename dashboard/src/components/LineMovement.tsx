@@ -35,9 +35,40 @@ export default function LineMovement({ sport }: LineMovementProps) {
       setLoading(true)
       try {
         const response = await axios.get(`/api/steam-moves/${sport}`)
-        setSteamMoves(response.data.steamMoves || [])
+
+        // Transform API response to component format
+        const moves: SteamMove[] = []
+
+        // Add line movements from database
+        for (const m of response.data.movements || []) {
+          moves.push({
+            gameId: m.game_id,
+            book: m.bookmaker,
+            oldLine: m.old_line || m.old_odds,
+            newLine: m.new_line || m.new_odds,
+            change: m.delta,
+            time: new Date(m.captured_at).toLocaleTimeString(),
+            significance: Math.abs(m.delta) >= 20 ? 'steam' : Math.abs(m.delta) >= 10 ? 'high' : Math.abs(m.delta) >= 5 ? 'medium' : 'low'
+          })
+        }
+
+        // Add steam signals from network
+        for (const s of response.data.steamSignals || []) {
+          moves.push({
+            gameId: s.payload.gameId,
+            book: s.evidence.books?.join(', ') || 'multiple',
+            oldLine: s.evidence.oldLine || 0,
+            newLine: s.evidence.newLine || 0,
+            change: s.evidence.delta || 0,
+            time: new Date(s.createdAt).toLocaleTimeString(),
+            significance: 'steam'
+          })
+        }
+
+        setSteamMoves(moves)
       } catch (err) {
         console.error('Failed to fetch steam moves:', err)
+        setSteamMoves([])
       } finally {
         setLoading(false)
       }

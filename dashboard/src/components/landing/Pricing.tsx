@@ -38,20 +38,20 @@ const pricingTiers = [
   },
   {
     name: 'Enterprise',
-    price: 'Custom',
-    period: '',
+    price: '$199',
+    period: '/month',
     description: 'For professional teams',
     features: [
       'Everything in Pro',
       'Unlimited API access',
       'Custom integrations',
-      'Dedicated account manager',
-      'White-label options',
+      'Dedicated support',
+      'Priority processing',
       'SLA guarantee',
-      'On-call support',
-      'Custom data feeds',
+      'Advanced webhooks',
+      'White-label options',
     ],
-    cta: 'Contact Sales',
+    cta: 'Start 14-Day Trial',
     highlighted: false,
   },
 ]
@@ -59,11 +59,7 @@ const pricingTiers = [
 export default function Pricing() {
   const { setShowAuthModal, setAuthMode } = useAuth()
 
-  const handleCTA = (tier: string) => {
-    if (tier === 'Enterprise') {
-      window.location.href = 'mailto:sales@roizenlabs.com?subject=SportIntel Enterprise'
-      return
-    }
+  const handleCTA = () => {
     setAuthMode('register')
     setShowAuthModal(true)
   }
@@ -125,7 +121,7 @@ export default function Pricing() {
 
               {/* CTA */}
               <button
-                onClick={() => handleCTA(tier.name)}
+                onClick={handleCTA}
                 className={`w-full py-3 rounded-xl font-semibold transition-all ${
                   tier.highlighted
                     ? 'bg-green-500 hover:bg-green-600 text-white'

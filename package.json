@@ -1,25 +1,39 @@
 {
   "name": "@sportintel/mcp-server",
-  "version": "2.5.0",
-  "description": "AI-powered sports analytics MCP server with live odds, arbitrage, and alerts",
+  "version": "2.6.0",
+  "description": "AI-powered sports analytics MCP server with live odds, arbitrage, signals, and alerts",
   "main": "dist/index.js",
   "scripts": {
     "dev": "tsx watch src/index.ts",
     "build": "tsup src/index.ts --format cjs --dts --clean",
     "start": "node dist/index.js",
     "dashboard": "cd dashboard && npm run dev",
-    "test": "echo 'No tests yet'"
+    "api": "cd api && npm run dev",
+    "api:migrate": "cd api && npm run migrate",
+    "api:test": "cd api && npm run test:network",
+    "network": "concurrently \"npm run api\" \"npm run dashboard\"",
+    "network:test": "cd api && npm run test:network",
+    "activate": "powershell -ExecutionPolicy Bypass -File activate-network.ps1",
+    "test": "echo 'No tests yet'",
+    "gateway": "cd windows-gateway && npm start",
+    "gateway:install": "cd windows-gateway && npm install",
+    "publisher": "tsx src/signal-publisher.ts",
+    "subscriber": "tsx src/signals/subscriber.ts",
+    "signals": "concurrently \"npm run gateway\" \"npm run publisher\"",
+    "signals:full": "concurrently \"npm run gateway\" \"npm run publisher\" \"npm run subscriber\""
   },
   "dependencies": {
     "@modelcontextprotocol/sdk": "^0.7.0",
     "axios": "^1.13.2",
     "dotenv": "^16.6.1",
     "pg": "^8.11.0",
+    "redis": "^4.6.0",
     "zod": "^3.22.0"
   },
   "devDependencies": {
     "@types/node": "^20.11.0",
     "@types/pg": "^8.10.0",
+    "concurrently": "^8.2.2",
     "tsup": "^8.5.1",
     "tsx": "^4.7.0",
     "typescript": "^5.9.3"

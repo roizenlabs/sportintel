@@ -1,7 +1,8 @@
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
-import { Zap, Menu, X } from 'lucide-react'
+import { Menu, X } from 'lucide-react'
 import { useAuth } from '../../hooks/useAuth'
+import Logo from '../Logo'
 
 export default function Header() {
   const { isAuthenticated, setShowAuthModal, setAuthMode } = useAuth()
@@ -23,12 +24,10 @@ export default function Header() {
         <div className="flex items-center justify-between">
           {/* Logo */}
           <Link to="/" className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-green-500 to-emerald-600 flex items-center justify-center">
-              <Zap className="w-6 h-6 text-white" />
-            </div>
+            <Logo size="lg" />
             <div>
-              <h1 className="text-xl font-bold text-white">SportIntel</h1>
-              <p className="text-xs text-gray-400">by RoizenLabs</p>
+              <h1 className="text-xl font-bold text-white">RoizenLabs</h1>
+              <p className="text-xs text-gray-400">Betting Intelligence</p>
             </div>
           </Link>
 

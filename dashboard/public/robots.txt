@@ -1,0 +1,10 @@
+# SportIntel robots.txt
+User-agent: *
+Allow: /
+
+# Sitemap location
+Sitemap: https://roizenlabs.com/sitemap.xml
+
+# Disallow admin and API routes from indexing
+Disallow: /admin
+Disallow: /api/

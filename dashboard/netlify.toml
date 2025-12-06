@@ -1,0 +1,44 @@
+[build]
+  publish = "dist"
+  command = "npm run build"
+
+# Disable caching for HTML to always get fresh app
+[[headers]]
+  for = "/"
+  [headers.values]
+    Cache-Control = "no-cache, no-store, must-revalidate"
+
+[[headers]]
+  for = "/*.html"
+  [headers.values]
+    Cache-Control = "no-cache, no-store, must-revalidate"
+
+# Cache assets with hashed names for 1 year
+[[headers]]
+  for = "/assets/*"
+  [headers.values]
+    Cache-Control = "public, max-age=31536000, immutable"
+
+# Cache static files (images, fonts, etc)
+[[headers]]
+  for = "/*.svg"
+  [headers.values]
+    Cache-Control = "public, max-age=86400"
+
+[[headers]]
+  for = "/*.png"
+  [headers.values]
+    Cache-Control = "public, max-age=86400"
+
+# API proxy
+[[redirects]]
+  from = "/api/*"
+  to = "https://sport-intel-production.up.railway.app/api/:splat"
+  status = 200
+  force = true
+
+# SPA fallback - Netlify serves static files first by default
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200

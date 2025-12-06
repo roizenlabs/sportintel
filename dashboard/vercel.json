@@ -4,7 +4,8 @@
   "installCommand": "npm install",
   "framework": "vite",
   "rewrites": [
-    { "source": "/api/:path*", "destination": "https://api.roizenlabs.com/api/:path*" }
+    { "source": "/api/:path*", "destination": "https://sport-intel-production.up.railway.app/api/:path*" },
+    { "source": "/((?!api/).*)", "destination": "/index.html" }
   ],
   "headers": [
     {

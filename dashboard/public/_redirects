@@ -1,0 +1,5 @@
+# API proxy to Railway
+/api/*  https://sport-intel-production.up.railway.app/api/:splat  200
+
+# SPA fallback - only for non-file routes
+/*    /index.html   200

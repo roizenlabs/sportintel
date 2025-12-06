@@ -49,6 +49,7 @@ import {
   getTopNodes
 } from './lib/context-ledger.js'
 import adminRoutes, { requireAdmin, setDatabase as setAdminDatabase } from './lib/admin-routes.js'
+import referralRoutes, { setDatabase as setReferralDatabase, initReferralTables } from './lib/referral-routes.js'
 import { pool } from './db/index.js'
 import fs from 'fs'
 import path from 'path'
@@ -831,6 +832,182 @@ app.put('/api/user/preferences', authenticateToken, async (req: AuthRequest, res
   }
 })
 
+// GET /api/user/profile - Get current user's profile
+app.get('/api/user/profile', authenticateToken, async (req: AuthRequest, res) => {
+  try {
+    const result = await pool.query(
+      `SELECT id, email, username, first_name, last_name, tier, is_admin,
+              api_calls_today, api_calls_total, created_at
+       FROM users WHERE id = $1`,
+      [req.user!.id]
+    )
+
+    if (result.rows.length === 0) {
+      return res.status(404).json({ error: 'User not found' })
+    }
+
+    const user = result.rows[0]
+    res.json({
+      profile: {
+        id: user.id,
+        email: user.email,
+        username: user.username,
+        firstName: user.first_name,
+        lastName: user.last_name,
+        tier: user.tier || 'free',
+        isAdmin: user.is_admin || false,
+        apiCallsToday: user.api_calls_today || 0,
+        apiCallsTotal: user.api_calls_total || 0,
+        createdAt: user.created_at
+      }
+    })
+  } catch (err: any) {
+    console.error('[USER] Profile error:', err.message)
+    res.status(500).json({ error: 'Failed to get profile' })
+  }
+})
+
+// PUT /api/user/profile - Update user's profile
+app.put('/api/user/profile', authenticateToken, async (req: AuthRequest, res) => {
+  try {
+    const { firstName, lastName, username } = req.body
+
+    // Validate username if provided
+    if (username) {
+      // Check username format
+      if (!/^[a-zA-Z0-9_]{3,20}$/.test(username)) {
+        return res.status(400).json({ error: 'Username must be 3-20 characters, alphanumeric and underscores only' })
+      }
+
+      // Check if username is taken
+      const existing = await pool.query(
+        'SELECT id FROM users WHERE username = $1 AND id != $2',
+        [username, req.user!.id]
+      )
+      if (existing.rows.length > 0) {
+        return res.status(409).json({ error: 'Username already taken' })
+      }
+    }
+
+    const result = await pool.query(
+      `UPDATE users
+       SET first_name = COALESCE($2, first_name),
+           last_name = COALESCE($3, last_name),
+           username = COALESCE($4, username),
+           updated_at = CURRENT_TIMESTAMP
+       WHERE id = $1
+       RETURNING id, email, username, first_name, last_name, tier, is_admin, created_at`,
+      [req.user!.id, firstName, lastName, username]
+    )
+
+    if (result.rows.length === 0) {
+      return res.status(404).json({ error: 'User not found' })
+    }
+
+    const user = result.rows[0]
+    res.json({
+      profile: {
+        id: user.id,
+        email: user.email,
+        username: user.username,
+        firstName: user.first_name,
+        lastName: user.last_name,
+        tier: user.tier || 'free',
+        isAdmin: user.is_admin || false,
+        createdAt: user.created_at
+      }
+    })
+  } catch (err: any) {
+    console.error('[USER] Profile update error:', err.message)
+    res.status(500).json({ error: 'Failed to update profile' })
+  }
+})
+
+// PUT /api/user/password - Change password
+app.put('/api/user/password', authenticateToken, async (req: AuthRequest, res) => {
+  try {
+    const { currentPassword, newPassword } = req.body
+
+    if (!currentPassword || !newPassword) {
+      return res.status(400).json({ error: 'Current password and new password required' })
+    }
+
+    if (newPassword.length < 6) {
+      return res.status(400).json({ error: 'New password must be at least 6 characters' })
+    }
+
+    // Get current password hash
+    const userResult = await pool.query(
+      'SELECT password_hash FROM users WHERE id = $1',
+      [req.user!.id]
+    )
+
+    if (userResult.rows.length === 0) {
+      return res.status(404).json({ error: 'User not found' })
+    }
+
+    // Verify current password
+    const bcrypt = await import('bcryptjs')
+    const valid = await bcrypt.compare(currentPassword, userResult.rows[0].password_hash)
+    if (!valid) {
+      return res.status(401).json({ error: 'Current password is incorrect' })
+    }
+
+    // Hash new password and update
+    const newHash = await bcrypt.hash(newPassword, 10)
+    await pool.query(
+      'UPDATE users SET password_hash = $2, updated_at = CURRENT_TIMESTAMP WHERE id = $1',
+      [req.user!.id, newHash]
+    )
+
+    // Invalidate all refresh tokens (force re-login on other devices)
+    await pool.query('DELETE FROM refresh_tokens WHERE user_id = $1', [req.user!.id])
+
+    res.json({ success: true, message: 'Password updated successfully' })
+  } catch (err: any) {
+    console.error('[USER] Password change error:', err.message)
+    res.status(500).json({ error: 'Failed to change password' })
+  }
+})
+
+// DELETE /api/user/account - Delete user account
+app.delete('/api/user/account', authenticateToken, async (req: AuthRequest, res) => {
+  try {
+    const { password } = req.body
+
+    if (!password) {
+      return res.status(400).json({ error: 'Password required to delete account' })
+    }
+
+    // Verify password
+    const userResult = await pool.query(
+      'SELECT password_hash FROM users WHERE id = $1',
+      [req.user!.id]
+    )
+
+    if (userResult.rows.length === 0) {
+      return res.status(404).json({ error: 'User not found' })
+    }
+
+    const bcrypt = await import('bcryptjs')
+    const valid = await bcrypt.compare(password, userResult.rows[0].password_hash)
+    if (!valid) {
+      return res.status(401).json({ error: 'Incorrect password' })
+    }
+
+    // Delete user data (cascade should handle related records)
+    await pool.query('DELETE FROM refresh_tokens WHERE user_id = $1', [req.user!.id])
+    await pool.query('DELETE FROM user_preferences WHERE user_id = $1', [req.user!.id])
+    await pool.query('DELETE FROM prop_watchlist WHERE user_id = $1', [req.user!.id])
+    await pool.query('DELETE FROM users WHERE id = $1', [req.user!.id])
+
+    res.json({ success: true, message: 'Account deleted successfully' })
+  } catch (err: any) {
+    console.error('[USER] Account deletion error:', err.message)
+    res.status(500).json({ error: 'Failed to delete account' })
+  }
+})
+
 // ============================================
 // NETWORK NODE ROUTES
 // ============================================
@@ -1122,6 +1299,10 @@ app.post('/api/bootstrap-admin', async (req, res) => {
 // Mount admin routes (protected by requireAdmin middleware)
 app.use('/api/admin', authenticateToken, requireAdmin, adminRoutes)
 
+// Mount referral routes
+setReferralDatabase(pool)
+app.use('/api/referral', optionalAuth, referralRoutes)
+
 // ============================================
 // START SERVER
 // ============================================
@@ -1133,6 +1314,9 @@ const redisOk = !!process.env.REDIS_URL
 httpServer.listen(PORT, async () => {
   // Run all database migrations on startup
   await runMigrations()
+
+  // Initialize referral tables
+  await initReferralTables()
 
   // Initialize Signal Bus
   try {

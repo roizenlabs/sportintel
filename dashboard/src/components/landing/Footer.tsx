@@ -1,5 +1,6 @@
 import { Link } from 'react-router-dom'
-import { Zap, Github, Twitter } from 'lucide-react'
+import { Github, Twitter } from 'lucide-react'
+import Logo from '../Logo'
 
 const footerSections = [
   {
@@ -7,34 +8,14 @@ const footerSections = [
     links: [
       { label: 'Features', href: '#features' },
       { label: 'Pricing', href: '#pricing' },
-      { label: 'API', href: '#api' },
-      { label: 'Changelog', href: '/docs/changelog' },
+      { label: 'API Docs', href: '/docs' },
     ],
   },
   {
-    title: 'Resources',
+    title: 'Support',
     links: [
       { label: 'Documentation', href: '/docs' },
-      { label: 'API Reference', href: '/docs/api' },
-      { label: 'Status', href: 'https://status.roizenlabs.com' },
-      { label: 'Support', href: 'mailto:support@roizenlabs.com' },
-    ],
-  },
-  {
-    title: 'Company',
-    links: [
-      { label: 'About', href: '/about' },
-      { label: 'Blog', href: '/blog' },
-      { label: 'Careers', href: '/careers' },
-      { label: 'Contact', href: 'mailto:hello@roizenlabs.com' },
-    ],
-  },
-  {
-    title: 'Legal',
-    links: [
-      { label: 'Privacy', href: '/privacy' },
-      { label: 'Terms', href: '/terms' },
-      { label: 'Responsible Gaming', href: '/responsible-gaming' },
+      { label: 'Contact', href: 'mailto:support@roizenlabs.com' },
     ],
   },
 ]
@@ -47,16 +28,14 @@ export default function Footer() {
           {/* Brand */}
           <div className="col-span-2 md:col-span-1">
             <Link to="/" className="flex items-center gap-3 mb-4">
-              <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-green-500 to-emerald-600 flex items-center justify-center">
-                <Zap className="w-6 h-6 text-white" />
-              </div>
+              <Logo size="lg" />
               <div>
-                <div className="text-white font-bold">SportIntel</div>
-                <div className="text-xs text-gray-400">by RoizenLabs</div>
+                <div className="text-white font-bold">RoizenLabs</div>
+                <div className="text-xs text-gray-400">Betting Intelligence</div>
               </div>
             </Link>
             <p className="text-gray-400 text-sm mb-4">
-              Professional sports data analytics platform.
+              Real-time arbitrage detection and sports betting analytics.
             </p>
             {/* Social Links */}
             <div className="flex gap-3">

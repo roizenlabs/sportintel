@@ -1,11 +1,13 @@
 import { useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
-import { Activity, TrendingUp, DollarSign, Bell, Zap, RefreshCw, User, LogOut, Users, Home } from 'lucide-react'
+import { Activity, TrendingUp, DollarSign, Bell, RefreshCw, User, LogOut, Users, Home, Lock } from 'lucide-react'
+import Logo from '../components/Logo'
 import LiveOdds from '../components/LiveOdds'
 import ArbitrageScanner from '../components/ArbitrageScanner'
 import LineMovement from '../components/LineMovement'
 import AlertSettings from '../components/AlertSettings'
 import PlayerProps from '../components/PlayerProps'
+import LiveOddsTicker from '../components/LiveOddsTicker'
 import AuthModal from '../components/AuthModal'
 import { useAuth } from '../hooks/useAuth'
 
@@ -16,7 +18,7 @@ export default function DashboardPage() {
   const [sport, setSport] = useState<Sport>('nba')
   const [activeTab, setActiveTab] = useState<Tab>('odds')
   const [lastUpdate, setLastUpdate] = useState(new Date())
-  const { user, token, logout, showAuthModal, setShowAuthModal, login } = useAuth()
+  const { user, token, logout, showAuthModal, setShowAuthModal, login, isLoading, setAuthMode } = useAuth()
 
   useEffect(() => {
     const interval = setInterval(() => setLastUpdate(new Date()), 30000)
@@ -27,6 +29,124 @@ export default function DashboardPage() {
     login({ ...authUser, id: String(authUser.id) }, accessToken, refreshToken)
   }
 
+  const openLogin = () => {
+    setAuthMode('login')
+    setShowAuthModal(true)
+  }
+
+  const openRegister = () => {
+    setAuthMode('register')
+    setShowAuthModal(true)
+  }
+
+  // Show loading state while checking auth
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-[#0a0f1a] flex items-center justify-center">
+        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-green-500"></div>
+      </div>
+    )
+  }
+
+  // Show locked state for unauthenticated users
+  if (!token) {
+    return (
+      <div className="min-h-screen bg-[#0a0f1a]">
+        {/* Header */}
+        <header className="border-b border-gray-800 bg-[#111827]/80 backdrop-blur-xl sticky top-0 z-50">
+          <div className="max-w-7xl mx-auto px-4 py-4">
+            <div className="flex items-center justify-between">
+              <Link to="/" className="flex items-center gap-3">
+                <Logo size="lg" />
+                <div>
+                  <h1 className="text-xl font-bold text-white">RoizenLabs</h1>
+                  <p className="text-xs text-gray-400">Real-time Sports Analytics</p>
+                </div>
+              </Link>
+              <div className="flex items-center gap-3">
+                <button
+                  onClick={openLogin}
+                  className="px-4 py-2 text-gray-300 hover:text-white transition-colors"
+                >
+                  Sign In
+                </button>
+                <button
+                  onClick={openRegister}
+                  className="px-4 py-2 bg-green-500 hover:bg-green-600 text-white font-medium rounded-lg transition-colors"
+                >
+                  Get Started
+                </button>
+              </div>
+            </div>
+          </div>
+        </header>
+
+        {/* Live Ticker */}
+        <LiveOddsTicker />
+
+        {/* Locked Dashboard Preview */}
+        <div className="max-w-7xl mx-auto px-4 py-12">
+          <div className="text-center mb-12">
+            <div className="inline-flex items-center justify-center w-20 h-20 rounded-full bg-gradient-to-br from-green-500/20 to-emerald-600/20 border border-green-500/30 mb-6">
+              <Lock className="w-10 h-10 text-green-400" />
+            </div>
+            <h2 className="text-3xl font-bold text-white mb-4">
+              Sign in to Access Full Dashboard
+            </h2>
+            <p className="text-gray-400 max-w-lg mx-auto mb-8">
+              Get real-time odds, arbitrage opportunities, line movements, and player props across all major sportsbooks.
+            </p>
+            <div className="flex items-center justify-center gap-4">
+              <button
+                onClick={openRegister}
+                className="px-6 py-3 bg-gradient-to-r from-green-500 to-emerald-600 text-white font-semibold rounded-xl hover:from-green-600 hover:to-emerald-700 transition-all"
+              >
+                Create Free Account
+              </button>
+              <button
+                onClick={openLogin}
+                className="px-6 py-3 border border-gray-600 text-gray-300 font-medium rounded-xl hover:border-gray-500 hover:text-white transition-all"
+              >
+                Sign In
+              </button>
+            </div>
+          </div>
+
+          {/* Feature preview cards */}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 opacity-60">
+            <div className="bg-gray-800/50 rounded-xl p-6 border border-gray-700">
+              <Activity className="w-8 h-8 text-blue-400 mb-4" />
+              <h3 className="text-white font-semibold mb-2">Live Odds</h3>
+              <p className="text-gray-400 text-sm">Compare odds across DraftKings, FanDuel, BetMGM, and more</p>
+            </div>
+            <div className="bg-gray-800/50 rounded-xl p-6 border border-gray-700">
+              <DollarSign className="w-8 h-8 text-green-400 mb-4" />
+              <h3 className="text-white font-semibold mb-2">Arbitrage Scanner</h3>
+              <p className="text-gray-400 text-sm">Find guaranteed profit opportunities in real-time</p>
+            </div>
+            <div className="bg-gray-800/50 rounded-xl p-6 border border-gray-700">
+              <TrendingUp className="w-8 h-8 text-yellow-400 mb-4" />
+              <h3 className="text-white font-semibold mb-2">Line Movement</h3>
+              <p className="text-gray-400 text-sm">Track sharp money and line shifts as they happen</p>
+            </div>
+            <div className="bg-gray-800/50 rounded-xl p-6 border border-gray-700">
+              <Users className="w-8 h-8 text-orange-400 mb-4" />
+              <h3 className="text-white font-semibold mb-2">Player Props</h3>
+              <p className="text-gray-400 text-sm">AI-powered player prop analysis and predictions</p>
+            </div>
+          </div>
+        </div>
+
+        {/* Auth Modal */}
+        <AuthModal
+          isOpen={showAuthModal}
+          onClose={() => setShowAuthModal(false)}
+          onAuth={handleAuth}
+        />
+      </div>
+    )
+  }
+
   return (
     <div className="min-h-screen bg-[#0a0f1a]">
       {/* Header */}
@@ -35,11 +155,9 @@ export default function DashboardPage() {
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-4">
               <Link to="/" className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-green-500 to-emerald-600 flex items-center justify-center">
-                  <Zap className="w-6 h-6 text-white" />
-                </div>
+                <Logo size="lg" />
                 <div>
-                  <h1 className="text-xl font-bold text-white">SportIntel</h1>
+                  <h1 className="text-xl font-bold text-white">RoizenLabs</h1>
                   <p className="text-xs text-gray-400">Real-time Sports Analytics</p>
                 </div>
               </Link>

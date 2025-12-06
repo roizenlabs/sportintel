@@ -2,12 +2,85 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+    <!-- Primary Meta Tags -->
+    <title>RoizenLabs | Real-time Betting Intelligence & Arbitrage Detection</title>
+    <meta name="title" content="RoizenLabs | Real-time Betting Intelligence & Arbitrage Detection" />
+    <meta name="description" content="Find arbitrage opportunities across 15+ sportsbooks in real-time. Get instant alerts for steam moves and line changes. The edge sharp bettors use." />
+    <meta name="keywords" content="sports betting, arbitrage betting, sports analytics, odds comparison, steam moves, betting API, sportsbook odds, sharp betting, roizenlabs" />
+    <meta name="author" content="RoizenLabs" />
+    <meta name="robots" content="index, follow" />
+
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content="https://roizenlabs.com/" />
+    <meta property="og:title" content="RoizenLabs | Betting Intelligence Platform" />
+    <meta property="og:description" content="Real-time arbitrage detection across 15+ sportsbooks. Steam move alerts. The edge sharp bettors use." />
+    <meta property="og:image" content="https://roizenlabs.com/og-image.png" />
+
+    <!-- Twitter -->
+    <meta property="twitter:card" content="summary_large_image" />
+    <meta property="twitter:url" content="https://roizenlabs.com/" />
+    <meta property="twitter:title" content="RoizenLabs | Betting Intelligence Platform" />
+    <meta property="twitter:description" content="Real-time arbitrage detection across 15+ sportsbooks. Steam move alerts. The edge sharp bettors use." />
+    <meta property="twitter:image" content="https://roizenlabs.com/og-image.png" />
+
+    <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <title>SportIntel | Real-time Sports Analytics</title>
+
+    <!-- Google Ads Conversion Tracking -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=AW-1012026890"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+      gtag('config', 'AW-1012026890');
+
+      // Conversion event helper functions
+      window.trackSignUp = function() {
+        gtag('event', 'conversion', {
+          'send_to': 'AW-1012026890/SIGNUP',
+          'value': 10.0,
+          'currency': 'USD'
+        });
+      };
+      window.trackTrialStart = function() {
+        gtag('event', 'conversion', {
+          'send_to': 'AW-1012026890/TRIAL',
+          'value': 20.0,
+          'currency': 'USD'
+        });
+      };
+      window.trackSubscription = function(value) {
+        gtag('event', 'conversion', {
+          'send_to': 'AW-1012026890/PURCHASE',
+          'value': value || 49.0,
+          'currency': 'USD',
+          'transaction_id': ''
+        });
+      };
+    </script>
+
+    <!-- Analytics: Plausible (privacy-focused, add your domain) -->
+    <!-- <script defer data-domain="roizenlabs.com" src="https://plausible.io/js/script.js"></script> -->
+
+    <!-- Analytics: PostHog (product analytics, add your key) -->
+    <!--
+    <script>
+      !function(t,e){var o,n,p,r;e.__SV||(window.posthog=e,e._i=[],e.init=function(i,s,a){function g(t,e){var o=e.split(".");2==o.length&&(t=t[o[0]],e=o[1]),t[e]=function(){t.push([e].concat(Array.prototype.slice.call(arguments,0)))}}(p=t.createElement("script")).type="text/javascript",p.async=!0,p.src=s.api_host+"/static/array.js",(r=t.getElementsByTagName("script")[0]).parentNode.insertBefore(p,r);var u=e;for(void 0!==a?u=e[a]=[]:a="posthog",u.people=u.people||[],u.toString=function(t){var e="posthog";return"posthog"!==a&&(e+="."+a),t||(e+=" (stub)"),e},u.people.toString=function(){return u.toString(1)+".people (stub)"},o="capture identify alias people.set people.set_once set_config register register_once unregister opt_out_capturing has_opted_out_capturing opt_in_capturing reset isFeatureEnabled onFeatureFlags getFeatureFlag getFeatureFlagPayload reloadFeatureFlags group updateEarlyAccessFeatureEnrollment getEarlyAccessFeatures getActiveMatchingSurveys getSurveys".split(" "),n=0;n<o.length;n++)g(u,o[n]);e._i.push([i,s,a])},e.__SV=1)}(document,window.posthog||[]);
+      posthog.init('YOUR_POSTHOG_KEY', {api_host: 'https://app.posthog.com'})
+    </script>
+    -->
+
+    <!-- Canonical URL -->
+    <link rel="canonical" href="https://roizenlabs.com/" />
+
+    <!-- Theme Color -->
+    <meta name="theme-color" content="#0a0f1a" />
   </head>
   <body>
     <div id="root"></div>
