@@ -249,9 +249,9 @@ class SportIntelMCPServer {
       case "analyze_player":
       case "get_player_props": {
         const playerName = args.player_name as string | undefined;
-        
+
         try {
-          const props = await propsService.getPlayerProps(args.sport as string, playerName);
+          const props = await propsService.getPlayerProps(args.sport as string, playerName ? { playerName } : undefined);
           
           if (props.length === 0) {
             return {

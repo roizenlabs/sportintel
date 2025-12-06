@@ -71,7 +71,8 @@
       "Bash(railway whoami:*)",
       "Bash(railway projects list:*)",
       "Bash(railway:*)",
-      "Bash(ls:*)"
+      "Bash(ls:*)",
+      "Bash(python3:*)"
     ],
     "deny": [],
     "ask": []
