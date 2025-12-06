@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import { DollarSign, AlertTriangle, Calculator } from 'lucide-react'
-import axios from 'axios'
+
+const API_BASE = import.meta.env.VITE_API_URL || 'https://sport-intel-production.up.railway.app'
 
 interface ArbitrageOpportunity {
   id: string
@@ -25,9 +26,10 @@ export default function ArbitrageScanner({ sport }: ArbitrageScannerProps) {
   const runScan = async () => {
     setScanning(true)
     try {
-      const response = await axios.get(`/api/arbitrage/${sport}`)
-      setArbs(response.data.opportunities || [])
-      setScannedGames(response.data.scannedGames || 0)
+      const response = await fetch(`${API_BASE}/api/arbitrage/${sport}`)
+      const data = response.ok ? await response.json() : { opportunities: [], scannedGames: 0 }
+      setArbs(data.opportunities || [])
+      setScannedGames(data.scannedGames || 0)
       setLastScan(new Date())
     } catch (err) {
       console.error('Arbitrage scan failed:', err)

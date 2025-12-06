@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import { Clock } from 'lucide-react'
-import axios from 'axios'
+
+const API_BASE = import.meta.env.VITE_API_URL || 'https://sport-intel-production.up.railway.app'
 
 interface OddsData {
   id: string
@@ -12,6 +13,7 @@ interface OddsData {
     draftkings?: { home: number; away: number; spread?: number }
     fanduel?: { home: number; away: number; spread?: number }
     bovada?: { home: number; away: number; spread?: number }
+    betmgm?: { home: number; away: number; spread?: number }
   }
 }
 
@@ -49,14 +51,38 @@ export default function LiveOdds({ sport }: LiveOddsProps) {
       setLoading(true)
       setError(null)
       try {
-        const response = await axios.get(`/api/odds/${sport}`)
-        setOdds(response.data.games || [])
-        // Only set remaining if it's a valid number
-        if (typeof response.data.remaining === 'number') {
-          setRemaining(response.data.remaining)
+        const response = await fetch(`${API_BASE}/api/odds/${sport}`)
+        if (!response.ok) throw new Error('Failed to fetch odds')
+        const data = await response.json()
+
+        // Transform API format (books array) to component format (odds object)
+        const transformedGames: OddsData[] = (data.games || []).map((game: any) => {
+          const odds: OddsData['odds'] = {}
+          if (game.books) {
+            game.books.forEach((book: any) => {
+              odds[book.bookmaker as keyof typeof odds] = {
+                home: book.homeOdds,
+                away: book.awayOdds,
+                spread: book.homeSpread
+              }
+            })
+          }
+          return {
+            id: game.gameId || game.id,
+            game: game.game || `${game.awayTeam} @ ${game.homeTeam}`,
+            homeTeam: game.homeTeam,
+            awayTeam: game.awayTeam,
+            startTime: new Date(game.startTime).toLocaleString(),
+            odds
+          }
+        })
+
+        setOdds(transformedGames)
+        if (typeof data.remaining === 'number') {
+          setRemaining(data.remaining)
         }
       } catch (err: any) {
-        setError(err.response?.data?.error || 'Failed to fetch odds')
+        setError(err.message || 'Failed to fetch odds')
         setOdds([])
       } finally {
         setLoading(false)

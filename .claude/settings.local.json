@@ -70,7 +70,8 @@
       "Bash(git reset:*)",
       "Bash(railway whoami:*)",
       "Bash(railway projects list:*)",
-      "Bash(railway:*)"
+      "Bash(railway:*)",
+      "Bash(ls:*)"
     ],
     "deny": [],
     "ask": []
