@@ -5,8 +5,10 @@
   "main": "dist/index.js",
   "scripts": {
     "dev": "tsx watch src/index.ts",
-    "build": "tsup src/index.ts --format cjs --dts --clean",
-    "start": "node dist/index.js",
+    "build": "cd api && npm install && npm run build",
+    "start": "cd api && node dist/server-realtime.js",
+    "mcp:build": "tsup src/index.ts --format cjs --dts --clean",
+    "mcp:start": "node dist/index.js",
     "dashboard": "cd dashboard && npm run dev",
     "api": "cd api && npm run dev",
     "api:migrate": "cd api && npm run migrate",
