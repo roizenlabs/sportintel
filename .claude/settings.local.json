@@ -67,7 +67,10 @@
       "Bash(nslookup:*)",
       "Bash(dir:*)",
       "Bash(git push:*)",
-      "Bash(git reset:*)"
+      "Bash(git reset:*)",
+      "Bash(railway whoami:*)",
+      "Bash(railway projects list:*)",
+      "Bash(railway:*)"
     ],
     "deny": [],
     "ask": []

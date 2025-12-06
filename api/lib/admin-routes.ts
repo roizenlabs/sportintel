@@ -339,4 +339,74 @@ router.post('/make-admin', async (req: Request, res: Response) => {
   }
 })
 
+// GET /api/admin/referrals - Get all referral data
+router.get('/referrals', async (_req: Request, res: Response) => {
+  try {
+    // Get referral stats
+    let stats = {
+      totalReferrals: 0,
+      convertedReferrals: 0,
+      pendingReferrals: 0,
+      topReferrers: [] as any[]
+    }
+
+    let referrals: any[] = []
+
+    try {
+      // Total referrals
+      const totalResult = await db.query(`SELECT COUNT(*) FROM referrals`)
+      stats.totalReferrals = parseInt(totalResult.rows[0].count || '0')
+
+      // Converted referrals
+      const convertedResult = await db.query(`SELECT COUNT(*) FROM referrals WHERE status = 'converted'`)
+      stats.convertedReferrals = parseInt(convertedResult.rows[0].count || '0')
+
+      // Pending referrals
+      stats.pendingReferrals = stats.totalReferrals - stats.convertedReferrals
+
+      // Top referrers
+      const topResult = await db.query(`
+        SELECT
+          u.email,
+          COUNT(r.id) as count,
+          COALESCE(rc.tier, 'bronze') as tier
+        FROM referrals r
+        JOIN users u ON r.referrer_id = u.id
+        LEFT JOIN referral_codes rc ON r.referrer_id = rc.user_id
+        GROUP BY u.email, rc.tier
+        ORDER BY count DESC
+        LIMIT 10
+      `)
+      stats.topReferrers = topResult.rows
+
+      // Get all referrals with user info
+      const referralsResult = await db.query(`
+        SELECT
+          r.id,
+          ref_user.email as referrer_email,
+          new_user.email as referred_email,
+          rc.code as referral_code,
+          r.status,
+          r.created_at,
+          r.converted_at
+        FROM referrals r
+        JOIN users ref_user ON r.referrer_id = ref_user.id
+        JOIN users new_user ON r.referred_id = new_user.id
+        LEFT JOIN referral_codes rc ON r.referrer_id = rc.user_id
+        ORDER BY r.created_at DESC
+        LIMIT 100
+      `)
+      referrals = referralsResult.rows
+
+    } catch (e: any) {
+      console.log('[ADMIN] Referrals tables not found or error:', e.message)
+    }
+
+    res.json({ stats, referrals })
+  } catch (error: any) {
+    console.error('[ADMIN] Referrals error:', error.message)
+    res.status(500).json({ error: 'Failed to fetch referrals' })
+  }
+})
+
 export default router

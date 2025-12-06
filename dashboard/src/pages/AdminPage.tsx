@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import {
   ArrowLeft, Users, CreditCard, Activity, TrendingUp,
-  Search, ChevronLeft, ChevronRight, Shield, Trash2, Radio
+  Search, ChevronLeft, ChevronRight, Shield, Trash2, Radio, Gift
 } from 'lucide-react'
 import { useAuth } from '../hooks/useAuth'
 
@@ -33,6 +33,23 @@ interface Pagination {
   pages: number
 }
 
+interface ReferralData {
+  id: string
+  referrer_email: string
+  referred_email: string
+  referral_code: string
+  status: 'pending' | 'converted'
+  created_at: string
+  converted_at?: string
+}
+
+interface ReferralStats {
+  totalReferrals: number
+  convertedReferrals: number
+  pendingReferrals: number
+  topReferrers: { email: string; count: number; tier: string }[]
+}
+
 export default function AdminPage() {
   const { token, user, isLoading: authLoading } = useAuth()
   const navigate = useNavigate()
@@ -42,7 +59,9 @@ export default function AdminPage() {
   const [users, setUsers] = useState<User[]>([])
   const [pagination, setPagination] = useState<Pagination>({ page: 1, limit: 20, total: 0, pages: 0 })
   const [search, setSearch] = useState('')
-  const [activeTab, setActiveTab] = useState<'overview' | 'users' | 'subscriptions'>('overview')
+  const [activeTab, setActiveTab] = useState<'overview' | 'users' | 'subscriptions' | 'referrals'>('overview')
+  const [referrals, setReferrals] = useState<ReferralData[]>([])
+  const [referralStats, setReferralStats] = useState<ReferralStats | null>(null)
 
   // Fetch admin stats
   const fetchStats = async () => {
@@ -118,6 +137,22 @@ export default function AdminPage() {
     }
   }
 
+  // Fetch referral data for admin
+  const fetchReferrals = async () => {
+    try {
+      const res = await fetch(`${API_BASE}/api/admin/referrals`, {
+        headers: { Authorization: `Bearer ${token}` }
+      })
+      if (res.ok) {
+        const data = await res.json()
+        setReferrals(data.referrals || [])
+        setReferralStats(data.stats || null)
+      }
+    } catch (err) {
+      console.error('Failed to fetch referrals:', err)
+    }
+  }
+
   useEffect(() => {
     // Wait for auth to finish loading before checking token
     if (authLoading) return
@@ -129,7 +164,7 @@ export default function AdminPage() {
 
     const loadData = async () => {
       setLoading(true)
-      await Promise.all([fetchStats(), fetchUsers()])
+      await Promise.all([fetchStats(), fetchUsers(), fetchReferrals()])
       setLoading(false)
     }
     loadData()
@@ -200,7 +235,7 @@ export default function AdminPage() {
       <div className="max-w-7xl mx-auto px-4 py-8">
         {/* Tabs */}
         <div className="flex gap-4 mb-8 border-b border-gray-800">
-          {(['overview', 'users', 'subscriptions'] as const).map((tab) => (
+          {(['overview', 'users', 'subscriptions', 'referrals'] as const).map((tab) => (
             <button
               key={tab}
               onClick={() => setActiveTab(tab)}
@@ -426,6 +461,115 @@ export default function AdminPage() {
                   from {stats.subscriptions.pro + stats.subscriptions.enterprise} paying customers
                 </div>
               </div>
+            </div>
+          </div>
+        )}
+
+        {/* Referrals Tab */}
+        {activeTab === 'referrals' && (
+          <div className="space-y-6">
+            {/* Referral Stats */}
+            {referralStats && (
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div className="bg-gray-800/50 rounded-xl p-6 border border-gray-700">
+                  <div className="flex items-center gap-3 mb-4">
+                    <Gift className="w-8 h-8 text-green-400" />
+                    <span className="text-gray-400">Total Referrals</span>
+                  </div>
+                  <div className="text-3xl font-bold text-white">{referralStats.totalReferrals}</div>
+                </div>
+                <div className="bg-gray-800/50 rounded-xl p-6 border border-green-500/50">
+                  <div className="flex items-center gap-3 mb-4">
+                    <Users className="w-8 h-8 text-green-400" />
+                    <span className="text-gray-400">Converted</span>
+                  </div>
+                  <div className="text-3xl font-bold text-green-400">{referralStats.convertedReferrals}</div>
+                </div>
+                <div className="bg-gray-800/50 rounded-xl p-6 border border-yellow-500/50">
+                  <div className="flex items-center gap-3 mb-4">
+                    <Activity className="w-8 h-8 text-yellow-400" />
+                    <span className="text-gray-400">Pending</span>
+                  </div>
+                  <div className="text-3xl font-bold text-yellow-400">{referralStats.pendingReferrals}</div>
+                </div>
+              </div>
+            )}
+
+            {/* Top Referrers */}
+            {referralStats?.topReferrers && referralStats.topReferrers.length > 0 && (
+              <div className="bg-gray-800/50 rounded-xl p-6 border border-gray-700">
+                <h2 className="text-xl font-bold text-white mb-4 flex items-center gap-2">
+                  <TrendingUp className="w-5 h-5 text-green-400" />
+                  Top Referrers
+                </h2>
+                <div className="space-y-3">
+                  {referralStats.topReferrers.map((referrer, i) => (
+                    <div key={i} className="flex items-center justify-between py-3 border-b border-gray-700 last:border-0">
+                      <div className="flex items-center gap-3">
+                        <span className="w-8 h-8 rounded-full bg-gray-700 flex items-center justify-center text-sm font-bold text-white">
+                          {i + 1}
+                        </span>
+                        <div>
+                          <div className="text-white">{referrer.email}</div>
+                          <div className="text-sm text-gray-400 capitalize">{referrer.tier} tier</div>
+                        </div>
+                      </div>
+                      <div className="text-green-400 font-bold">{referrer.count} referrals</div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Recent Referrals Table */}
+            <div className="bg-gray-800/50 rounded-xl border border-gray-700 overflow-hidden">
+              <div className="px-6 py-4 border-b border-gray-700">
+                <h2 className="text-xl font-bold text-white">All Referrals</h2>
+              </div>
+              <table className="w-full">
+                <thead className="bg-gray-800">
+                  <tr>
+                    <th className="text-left px-6 py-4 text-gray-400 font-medium">Referrer</th>
+                    <th className="text-left px-6 py-4 text-gray-400 font-medium">Referred User</th>
+                    <th className="text-left px-6 py-4 text-gray-400 font-medium">Code</th>
+                    <th className="text-left px-6 py-4 text-gray-400 font-medium">Status</th>
+                    <th className="text-left px-6 py-4 text-gray-400 font-medium">Date</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {referrals.length === 0 ? (
+                    <tr>
+                      <td colSpan={5} className="px-6 py-8 text-center text-gray-400">
+                        No referrals yet
+                      </td>
+                    </tr>
+                  ) : (
+                    referrals.map((ref) => (
+                      <tr key={ref.id} className="border-t border-gray-700 hover:bg-gray-800/50">
+                        <td className="px-6 py-4 text-white">{ref.referrer_email}</td>
+                        <td className="px-6 py-4 text-gray-300">{ref.referred_email}</td>
+                        <td className="px-6 py-4">
+                          <code className="px-2 py-1 bg-gray-700 rounded text-green-400 text-sm">
+                            {ref.referral_code}
+                          </code>
+                        </td>
+                        <td className="px-6 py-4">
+                          <span className={`px-2 py-1 rounded text-xs font-medium ${
+                            ref.status === 'converted'
+                              ? 'bg-green-500/20 text-green-400'
+                              : 'bg-yellow-500/20 text-yellow-400'
+                          }`}>
+                            {ref.status}
+                          </span>
+                        </td>
+                        <td className="px-6 py-4 text-gray-400">
+                          {new Date(ref.created_at).toLocaleDateString()}
+                        </td>
+                      </tr>
+                    ))
+                  )}
+                </tbody>
+              </table>
             </div>
           </div>
         )}
