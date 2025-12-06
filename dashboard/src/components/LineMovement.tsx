@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import { TrendingUp, TrendingDown, AlertCircle, Clock } from 'lucide-react'
-import axios from 'axios'
+
+const API_BASE = import.meta.env.VITE_API_URL || 'https://sport-intel-production.up.railway.app'
 
 interface SteamMove {
   gameId: string
@@ -34,13 +35,14 @@ export default function LineMovement({ sport }: LineMovementProps) {
     const fetchSteamMoves = async () => {
       setLoading(true)
       try {
-        const response = await axios.get(`/api/steam-moves/${sport}`)
+        const response = await fetch(`${API_BASE}/api/steam-moves/${sport}`)
+        const data = response.ok ? await response.json() : { movements: [], steamSignals: [] }
 
         // Transform API response to component format
         const moves: SteamMove[] = []
 
         // Add line movements from database
-        for (const m of response.data.movements || []) {
+        for (const m of data.movements || []) {
           moves.push({
             gameId: m.game_id,
             book: m.bookmaker,
@@ -53,7 +55,7 @@ export default function LineMovement({ sport }: LineMovementProps) {
         }
 
         // Add steam signals from network
-        for (const s of response.data.steamSignals || []) {
+        for (const s of data.steamSignals || []) {
           moves.push({
             gameId: s.payload.gameId,
             book: s.evidence.books?.join(', ') || 'multiple',

@@ -1,9 +1,7 @@
 import { useState, useEffect } from 'react'
-import axios from 'axios'
 import { Search, TrendingUp, Star, StarOff, Filter } from 'lucide-react'
 
-// Use relative URL to leverage Vite proxy in dev, or production API URL
-const API_URL = ''
+const API_BASE = import.meta.env.VITE_API_URL || 'https://sport-intel-production.up.railway.app'
 
 interface PropComparison {
   player: string
@@ -37,12 +35,14 @@ export default function PlayerProps({ sport, token }: PlayerPropsProps) {
     setLoading(true)
     setError('')
     try {
-      const params: any = {}
-      if (selectedMarket) params.market = selectedMarket
+      const params = new URLSearchParams()
+      if (selectedMarket) params.set('market', selectedMarket)
+      const queryString = params.toString() ? `?${params.toString()}` : ''
 
-      const response = await axios.get(`${API_URL}/api/props/${sport}`, { params })
-      setProps(response.data.props || [])
-      setMarkets(response.data.markets || [])
+      const response = await fetch(`${API_BASE}/api/props/${sport}${queryString}`)
+      const data = response.ok ? await response.json() : { props: [], markets: [] }
+      setProps(data.props || [])
+      setMarkets(data.markets || [])
     } catch (err: any) {
       setError(err.response?.data?.error || 'Failed to fetch props')
     } finally {
@@ -62,16 +62,19 @@ export default function PlayerProps({ sport, token }: PlayerPropsProps) {
       // If logged in, save to backend
       if (token) {
         try {
-          await axios.post(
-            `${API_URL}/api/watchlist`,
-            {
+          await fetch(`${API_BASE}/api/watchlist`, {
+            method: 'POST',
+            headers: {
+              Authorization: `Bearer ${token}`,
+              'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
               playerName: prop.player,
               sport,
               propType: prop.market,
               targetLine: prop.line
-            },
-            { headers: { Authorization: `Bearer ${token}` } }
-          )
+            })
+          })
         } catch (err) {
           console.error('Failed to save to watchlist:', err)
         }

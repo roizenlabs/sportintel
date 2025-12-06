@@ -90,7 +90,25 @@ export default function LiveOddsTicker() {
         responses.forEach((data, idx) => {
           if (data.games) {
             data.games.forEach((game: any) => {
-              allGames.push({ ...game, sport: sports[idx].toUpperCase() })
+              // Transform API format to component format
+              const odds: TickerGame['odds'] = {}
+              if (game.books) {
+                game.books.forEach((book: any) => {
+                  odds[book.bookmaker as keyof typeof odds] = {
+                    home: book.homeOdds,
+                    away: book.awayOdds,
+                    spread: book.homeSpread
+                  }
+                })
+              }
+              allGames.push({
+                id: game.gameId || game.id,
+                homeTeam: game.homeTeam,
+                awayTeam: game.awayTeam,
+                startTime: game.startTime,
+                sport: sports[idx].toUpperCase(),
+                odds
+              })
             })
           }
         })
