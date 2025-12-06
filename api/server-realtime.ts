@@ -320,9 +320,13 @@ app.get('/api/arbitrage/:sport', async (req, res) => {
       a.sport === sport && a.profit >= minProfit
     )
 
+    // Get actual game count from odds cache
+    const cachedOdds = await cache.getOdds(sport)
+    const scannedGames = cachedOdds?.length || 0
+
     res.json({
       opportunities: sportArbs,
-      scannedGames: sportArbs.length,
+      scannedGames,
       cached: true,
       hint: 'Connect via WebSocket for real-time updates'
     })
