@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
-import { Activity, TrendingUp, DollarSign, Bell, RefreshCw, User, LogOut, Users, Home, Lock } from 'lucide-react'
+import { Activity, TrendingUp, DollarSign, Bell, RefreshCw, User, LogOut, Users, Home } from 'lucide-react'
 import Logo from '../components/Logo'
 import LiveOdds from '../components/LiveOdds'
 import ArbitrageScanner from '../components/ArbitrageScanner'
@@ -27,11 +27,6 @@ export default function DashboardPage() {
 
   const handleAuth = (authUser: { id: number | string; email: string; name?: string }, accessToken: string, refreshToken: string) => {
     login({ ...authUser, id: String(authUser.id) }, accessToken, refreshToken)
-  }
-
-  const openLogin = () => {
-    setAuthMode('login')
-    setShowAuthModal(true)
   }
 
   const openRegister = () => {
